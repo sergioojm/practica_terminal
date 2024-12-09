@@ -100,3 +100,13 @@ int main()
       }
    }
 }
+
+
+/*
+
+Echar un vistazo a pistas
+
+comprobar q un fichero existe
+dentro del directorio -> nombre del fichero y inodo, revisar dentro del directorio si un fichero 
+
+*/
