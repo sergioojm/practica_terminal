@@ -48,16 +48,12 @@ void Printbytemaps(EXT_BYTE_MAPS *ext_bytemaps){
 
 int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argumento2)
 {
-
 	/*
 	 *	Buscar en strcomando, la orden (primer espacio)
 	 *	luego buscar el argumento1 (segundo espacio)
 	 *	y por ultimo buscar el argumento2 (tercer espacio)
-	 *
-	 * 
 	 * */
 	
-
 	char* subString = strtok(strcomando, " ");
 	int argument_index = 0;
 	int res = -1;
@@ -94,7 +90,6 @@ int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argu
 		subString = strtok(NULL, " ");
 	}
 
-
 	return res;
 }
 
@@ -123,20 +118,19 @@ int main()
    fent = fopen("particion.bin", "r+b");
    fread(&datosfich, SIZE_BLOQUE, MAX_BLOQUES_PARTICION, fent);
 
+/* COMENTADOS PARA TESTING
+
    memcpy(&ext_superblock, (EXT_SIMPLE_SUPERBLOCK *)&datosfich[0], SIZE_BLOQUE);
    memcpy(&directorio, (EXT_ENTRADA_DIR *)&datosfich[3], SIZE_BLOQUE);
    memcpy(&ext_bytemaps, (EXT_BLQ_INODOS *)&datosfich[1], SIZE_BLOQUE);
    memcpy(&ext_blq_inodos, (EXT_BLQ_INODOS *)&datosfich[2], SIZE_BLOQUE);
    memcpy(&memdatos, (EXT_DATOS *)&datosfich[4], MAX_BLOQUES_DATOS * SIZE_BLOQUE);
 
-
-
-
-
+*/
    // Buce de tratamiento de comandos
    for (;;)
    {
-	int comandoEncontrado = 0;   
+	int comandoEncontrado = 0;
 
 	do
       {
@@ -146,12 +140,47 @@ int main()
       } while (ComprobarComando(comando, orden, argumento1, argumento2) != 0);
 
 	
-
       if (strcmp(orden, "dir\n") == 0)
       {
-//         Directorio(&directorio, &ext_blq_inodos);
-  		printf("dir");
-      	comandoEncontrado = 1;
+            //Directorio(&directorio, &ext_blq_inodos);
+            printf("dir");
+            comandoEncontrado = 1;
+      }
+      else if (strcmp(orden, "info\n") == 0)
+      {
+            // Llamar funciones
+            printf("info");
+            comandoEncontrado = 1;
+      }
+      else if (strcmp(orden, "bytemaps\n") == 0)
+      {
+            // Llamar funciones
+            printf("bytemaps");
+            comandoEncontrado = 1;
+      }
+      else if (strcmp(orden, "rename\n") == 0)
+      {
+            // Llamar funciones
+            printf("rename");
+            comandoEncontrado = 1;
+      }
+      else if (strcmp(orden, "imprimir\n") == 0)
+      {
+            // Llamar funciones
+            printf("imprimir");
+            comandoEncontrado = 1;
+      }
+      else if (strcmp(orden, "remove\n") == 0)
+      {
+            // Llamar funciones
+            printf("remove");
+            comandoEncontrado = 1;
+      }
+      else if (strcmp(orden, "copy\n") == 0)
+      {
+            // Llamar funciones
+            printf("copy");
+            comandoEncontrado = 1;
       }
 
 /*
@@ -171,15 +200,15 @@ int main()
       // faltan los datos y cerrar
       if (strcmp(orden, "salir\n") == 0)
       {
-         //GrabarDatos(&memdatos, fent);
-         fclose(fent);
-	printf("\nSaliendo......");
-	 return 0;
+            //GrabarDatos(&memdatos, fent);
+            fclose(fent);
+	      printf("\nSaliendo......");
+	      return 0;
       }
 
       if (comandoEncontrado == 0)
       {
-	printf("\nError: Comando desconocido [bytemaps, copy, dir, info, imprimir, rename, remove, salir ]\n");
+	      printf("Error: Comando desconocido [bytemaps, copy, dir, info, imprimir, rename, remove, salir ]\n");
       }
    }
 }
