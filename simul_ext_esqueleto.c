@@ -62,11 +62,13 @@ void Printbytemaps(EXT_BYTE_MAPS *ext_bytemaps){
       // Los bytemaps son caracteres, por eso %c,
       // pero al ser 1 y 0, se debería poder poner %i,
       //lo veremos cuando funciones
-
+	printf("Bloques [0-24]:\t");
       // Imprime el bytemap de los primeros 25 bloques
-      for (int i = 0; i < 25; i++) printf("%c", ext_bytemaps->bmap_bloques[i]);
+      for (int i = 0; i < 25; i++) printf("%u ", ext_bytemaps->bmap_bloques[i]);
+      printf("\nInodos:\t");
       // Imprime el bytemap de inodos
-      for (int i = 0; i < MAX_INODOS; i++) printf("%c", ext_bytemaps->bmap_bloques[i]);
+      for (int i = 0; i < MAX_INODOS; i++) printf("%u ", ext_bytemaps->bmap_bloques[i]);
+      printf("\n");
       // que hace: ext_bytemaps->bmap_relleno ??
 }
 
@@ -117,7 +119,8 @@ int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argu
 	return res;
 }
 
-void handleComand(char *orden, char *argumento1, char *argumento2, int *comandoEncontrado, EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *ext_blq_inodos){
+void handleComand(char *orden, char *argumento1, char *argumento2, int *comandoEncontrado, EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *ext_blq_inodos, EXT_BYTE_MAPS *ext_bytemaps)
+{
       
       if (strcmp(orden, "dir\n") == 0)
       {
@@ -133,7 +136,7 @@ void handleComand(char *orden, char *argumento1, char *argumento2, int *comandoE
       else if (strcmp(orden, "bytemaps\n") == 0)
       {
             // Llamar funciones
-            printf("bytemaps");
+	    Printbytemaps(ext_bytemaps);
             *comandoEncontrado = 1;
       }
       else if (strcmp(orden, "rename\n") == 0)
@@ -206,7 +209,7 @@ int main()
          fgets(comando, LONGITUD_COMANDO, stdin);
       } while (ComprobarComando(comando, orden, argumento1, argumento2) != 0);
 
-      handleComand(orden, argumento1, argumento2, &comandoEncontrado, directorio, &ext_blq_inodos);
+      handleComand(orden, argumento1, argumento2, &comandoEncontrado, directorio, &ext_blq_inodos, &ext_bytemaps);
 
 /*
       // Escritura de metadatos en comandos rename, remove, copy
