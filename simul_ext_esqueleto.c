@@ -40,7 +40,18 @@ void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos)
 	{
 		if (directorio[i].dir_inodo != 2 && directorio[i].dir_inodo != NULL_INODO) // directorio root y que exista inodo
 		{
-			printf("%s Inodo: %i size: %i\n", directorio[i].dir_nfich, directorio[i].dir_inodo, inodos->blq_inodos[directorio[i].dir_inodo].size_fichero);	
+			printf("%s \t Inodo: %i \t size (Bytes): %i \t Bloques: ", directorio[i].dir_nfich, directorio[i].dir_inodo, inodos->blq_inodos[directorio[i].dir_inodo].size_fichero);	
+		
+			
+			for (int j = 0; j < MAX_NUMS_BLOQUE_INODO; j++)
+			{
+				if (inodos->blq_inodos[directorio[i].dir_inodo].i_nbloque[j] != NULL_BLOQUE)
+				{
+					printf("%i ", inodos->blq_inodos[directorio[i].dir_inodo].i_nbloque[j]);
+				}
+			}
+
+			printf("\n");
 		}
 
 	}
