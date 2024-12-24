@@ -33,17 +33,52 @@ void GrabarSuperBloque(EXT_SIMPLE_SUPERBLOCK *ext_superblock, FILE *fich);
 void GrabarDatos(EXT_DATOS *memdatos, FILE *fich);
 
 
+int Renombrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombreantiguo, char *nombrenuevo)
+{
+	int existeFichero = BuscaFich(directorio, inodos, nombreantiguo);
+	int ficheroNombreNuevo = BuscaFich(directorio, inodos, nombrenuevo);
+
+
+	// si no existe el fichero, entonces terminar, como ella conmigo
+	if (existeFichero == -1)
+	{
+		printf("Fichero a renombrar no existente, como tu pelo\n”");
+		return -1;
+	}	
+
+	// si existe algun fichero con el nombre al que queremos cambiar, terminar <repetir chiste>
+	if (ficheroNombreNuevo != -1)
+	{
+		printf("Ese nombre ya existe!\n");
+		return -1;
+	}
+
+	for (int i = 0; i < MAX_FICHEROS; i++)
+	{
+		if (directorio[i].dir_inodo != 2 && directorio[i].dir_inodo != NULL_INODO && (strcmp(directorio[i].dir_nfich, nombreantiguo) == 0))
+		{
+			strcpy(directorio[i].dir_nfich, nombrenuevo);
+			printf("Fichero renombrado con existo a %s\n", nombrenuevo);
+		}
+
+	}
+
+	return 1;
+}
+
 // FUNCIONES DE DEPENDENCIA
 
 int BuscaFich(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombre){
 
+	int res = -1;
+
       for (int i = 0; i < MAX_FICHEROS; i++)
 	{
 		if (directorio[i].dir_inodo != 2 && directorio[i].dir_inodo != NULL_INODO) // directorio root y que exista inodo
-		      if (strcmp(nombre, directorio[i].dir_nfich) == 0) return i;
+		      if (strcmp(nombre, directorio[i].dir_nfich) == 0) res = i;
 	}
 
-      return -1;
+      return res;
 }
 
 
@@ -170,8 +205,8 @@ void handleComand(char *orden, char *argumento1, char *argumento2, int *comandoE
       else if (strcmp(orden, "rename") == 0)
       {
             // Llamar funciones
-            printf("rename");
-            *comandoEncontrado = 1;
+		Renombrar(directorio, ext_blq_inodos, argumento1, argumento2);
+	      *comandoEncontrado = 1;
       }
       else if (strcmp(orden, "imprimir") == 0)
       {
