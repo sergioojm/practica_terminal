@@ -34,6 +34,18 @@ void GrabarDatos(EXT_DATOS *memdatos, FILE *fich);
 
 
 
+void Printbytemaps(EXT_BYTE_MAPS *ext_bytemaps){
+      // Los bytemaps son caracteres, por eso %c,
+      // pero al ser 1 y 0, se debería poder poner %i,
+      //lo veremos cuando funciones
+
+      // Imprime el bytemap de los primeros 25 bloques
+      for (int i = 0; i < 25; i++) printf("%c", ext_bytemaps->bmap_bloques[i]);
+      // Imprime el bytemap de inodos
+      for (int i = 0; i < MAX_INODOS; i++) printf("%c", ext_bytemaps->bmap_bloques[i]);
+      // que hace: ext_bytemaps->bmap_relleno ??
+}
+
 int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argumento2)
 {
 
