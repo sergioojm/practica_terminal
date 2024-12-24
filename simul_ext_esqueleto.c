@@ -32,12 +32,20 @@ void GrabarByteMaps(EXT_BYTE_MAPS *ext_bytemaps, FILE *fich);
 void GrabarSuperBloque(EXT_SIMPLE_SUPERBLOCK *ext_superblock, FILE *fich);
 void GrabarDatos(EXT_DATOS *memdatos, FILE *fich);
 
+void GrabarDatos(EXT_DATOS *memdatos, FILE *fich)
+{
+    fseek(fich, 4*SIZE_BLOQUE, SEEK_SET);
+    fwrite(memdatos, MAX_BLOQUES_DATOS, SIZE_BLOQUE, fich);
+}
+
+
+
 int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *memdatos, char *nombre)
 {
 	if (BuscaFich(directorio, inodos, nombre) == -1)
 	{
 		printf("Fichero no existente\n");
-		return -1
+		return -1;
 	}
 
 
