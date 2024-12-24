@@ -32,12 +32,67 @@ void GrabarByteMaps(EXT_BYTE_MAPS *ext_bytemaps, FILE *fich);
 void GrabarSuperBloque(EXT_SIMPLE_SUPERBLOCK *ext_superblock, FILE *fich);
 void GrabarDatos(EXT_DATOS *memdatos, FILE *fich);
 
+
+
+int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argumento2)
+{
+
+	/*
+	 *	Buscar en strcomando, la orden (primer espacio)
+	 *	luego buscar el argumento1 (segundo espacio)
+	 *	y por ultimo buscar el argumento2 (tercer espacio)
+	 *
+	 * 
+	 * */
+	
+
+	char* subString = strtok(strcomando, " ");
+	int argument_index = 0;
+	int res = -1;
+
+
+	while(subString != NULL)
+	{
+		
+		switch(argument_index)
+		{
+			// para la orden
+			case 0:
+				strcpy(orden, subString);
+				res = 0;
+			break;
+
+			// para el argumento1
+			case 1:
+				strcpy(argumento1, subString);
+			break;
+
+			// para el argumento2
+			case 2:
+				strcpy(argumento2, subString);
+			break;
+
+			default:
+				; // maximo de argumentos compatibles excedido
+			break;
+		}
+
+
+		argument_index++;
+		subString = strtok(NULL, " ");
+	}
+
+
+	return res;
+}
+
+
 int main()
 {
-   char *comando[LONGITUD_COMANDO];
-   char *orden[LONGITUD_COMANDO];
-   char *argumento1[LONGITUD_COMANDO];
-   char *argumento2[LONGITUD_COMANDO];
+   char comando[LONGITUD_COMANDO];
+   char orden[LONGITUD_COMANDO];
+   char argumento1[LONGITUD_COMANDO];
+   char argumento2[LONGITUD_COMANDO];
 
    int i, j;
    unsigned long int m;
@@ -62,22 +117,32 @@ int main()
    memcpy(&ext_blq_inodos, (EXT_BLQ_INODOS *)&datosfich[2], SIZE_BLOQUE);
    memcpy(&memdatos, (EXT_DATOS *)&datosfich[4], MAX_BLOQUES_DATOS * SIZE_BLOQUE);
 
+
+
+
+
    // Buce de tratamiento de comandos
    for (;;)
    {
-      do
+	int comandoEncontrado = 0;   
+
+	do
       {
          printf(">> ");
          fflush(stdin);
          fgets(comando, LONGITUD_COMANDO, stdin);
       } while (ComprobarComando(comando, orden, argumento1, argumento2) != 0);
 
-      if (strcmp(orden, "dir") == 0)
+	
+
+      if (strcmp(orden, "dir\n") == 0)
       {
-         Directorio(&directorio, &ext_blq_inodos);
-         continue;
+//         Directorio(&directorio, &ext_blq_inodos);
+  		printf("dir");
+      	comandoEncontrado = 1;
       }
-  
+
+/*
       // Escritura de metadatos en comandos rename, remove, copy
       Grabarinodosydirectorio(&directorio, &ext_blq_inodos, fent);
       GrabarByteMaps(&ext_bytemaps, fent);
@@ -89,14 +154,20 @@ int main()
       }
    
       grabardatos = 0;
-
+*/
       // Si el comando es salir se habrán escrito todos los metadatos
       // faltan los datos y cerrar
-      if (strcmp(orden, "salir") == 0)
+      if (strcmp(orden, "salir\n") == 0)
       {
-         GrabarDatos(&memdatos, fent);
+         //GrabarDatos(&memdatos, fent);
          fclose(fent);
-         return 0;
+	printf("\nSaliendo......");
+	 return 0;
+      }
+
+      if (comandoEncontrado == 0)
+      {
+	printf("\nError: Comando desconocido [bytemaps, copy, dir, info, imprimir, rename, remove, salir ]\n");
       }
    }
 }
