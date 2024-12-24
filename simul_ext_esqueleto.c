@@ -93,6 +93,52 @@ int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argu
 	return res;
 }
 
+void handleComand(char *orden, char *argumento1, char *argumento2, int *comandoEncontrado){
+      
+      if (strcmp(orden, "dir\n") == 0)
+      {
+            //Directorio(&directorio, &ext_blq_inodos);
+            printf("dir");
+            comandoEncontrado = 1;
+      }
+      else if (strcmp(orden, "info\n") == 0)
+      {
+            // Llamar funciones
+            printf("info");
+            comandoEncontrado = 1;
+      }
+      else if (strcmp(orden, "bytemaps\n") == 0)
+      {
+            // Llamar funciones
+            printf("bytemaps");
+            comandoEncontrado = 1;
+      }
+      else if (strcmp(orden, "rename\n") == 0)
+      {
+            // Llamar funciones
+            printf("rename");
+            comandoEncontrado = 1;
+      }
+      else if (strcmp(orden, "imprimir\n") == 0)
+      {
+            // Llamar funciones
+            printf("imprimir");
+            comandoEncontrado = 1;
+      }
+      else if (strcmp(orden, "remove\n") == 0)
+      {
+            // Llamar funciones
+            printf("remove");
+            comandoEncontrado = 1;
+      }
+      else if (strcmp(orden, "copy\n") == 0)
+      {
+            // Llamar funciones
+            printf("copy");
+            comandoEncontrado = 1;
+      }
+}
+
 
 int main()
 {
@@ -139,49 +185,7 @@ int main()
          fgets(comando, LONGITUD_COMANDO, stdin);
       } while (ComprobarComando(comando, orden, argumento1, argumento2) != 0);
 
-	
-      if (strcmp(orden, "dir\n") == 0)
-      {
-            //Directorio(&directorio, &ext_blq_inodos);
-            printf("dir");
-            comandoEncontrado = 1;
-      }
-      else if (strcmp(orden, "info\n") == 0)
-      {
-            // Llamar funciones
-            printf("info");
-            comandoEncontrado = 1;
-      }
-      else if (strcmp(orden, "bytemaps\n") == 0)
-      {
-            // Llamar funciones
-            printf("bytemaps");
-            comandoEncontrado = 1;
-      }
-      else if (strcmp(orden, "rename\n") == 0)
-      {
-            // Llamar funciones
-            printf("rename");
-            comandoEncontrado = 1;
-      }
-      else if (strcmp(orden, "imprimir\n") == 0)
-      {
-            // Llamar funciones
-            printf("imprimir");
-            comandoEncontrado = 1;
-      }
-      else if (strcmp(orden, "remove\n") == 0)
-      {
-            // Llamar funciones
-            printf("remove");
-            comandoEncontrado = 1;
-      }
-      else if (strcmp(orden, "copy\n") == 0)
-      {
-            // Llamar funciones
-            printf("copy");
-            comandoEncontrado = 1;
-      }
+      handleComand(orden, argumento1, argumento2, comandoEncontrado);
 
 /*
       // Escritura de metadatos en comandos rename, remove, copy
