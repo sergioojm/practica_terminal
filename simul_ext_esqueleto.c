@@ -83,13 +83,13 @@ void Printbytemaps(EXT_BYTE_MAPS *ext_bytemaps){
       printf("\n");
 }
 
-void PrintInfo(EXT_SIMPLE_SUPERBLOCK *ext_superblock){
-      printf("Bloque %i Bytes\n", ext_superblock->s_block_size);
-      printf("inodos particion = %i\n", ext_superblock->s_inodes_count);
-      printf("inodods libres = %i\n", ext_superblock->s_free_inodes_count);
-      printf("Bloques particion = %i\n", ext_superblock->s_blocks_count);
-	printf("Bloques libres = %i\n", ext_superblock->s_free_blocks_count);
-      printf("Primer bloque de datos = %i\n", ext_superblock->s_first_data_block);
+void LeeSuperBloque(EXT_SIMPLE_SUPERBLOCK *psup){
+      printf("Bloque %i Bytes\n", psup->s_block_size);
+      printf("inodos particion = %i\n", psup->s_inodes_count);
+      printf("inodods libres = %i\n", psup->s_free_inodes_count);
+      printf("Bloques particion = %i\n", psup->s_blocks_count);
+	printf("Bloques libres = %i\n", psup->s_free_blocks_count);
+      printf("Primer bloque de datos = %i\n", psup->s_first_data_block);
 }
 
 
@@ -158,7 +158,7 @@ void handleComand(char *orden, char *argumento1, char *argumento2, int *comandoE
       }
       else if (strcmp(orden, "info") == 0)
       {
-            PrintInfo(ext_superblock);
+            LeeSuperBloque(ext_superblock);
             *comandoEncontrado = 1;
       }
       else if (strcmp(orden, "bytemaps") == 0)
