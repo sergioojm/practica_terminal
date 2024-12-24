@@ -33,6 +33,21 @@ void GrabarSuperBloque(EXT_SIMPLE_SUPERBLOCK *ext_superblock, FILE *fich);
 void GrabarDatos(EXT_DATOS *memdatos, FILE *fich);
 
 
+// FUNCIONES DE DEPENDENCIA
+
+int BuscaFich(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombre){
+
+      for (int i = 0; i < MAX_FICHEROS; i++)
+	{
+		if (directorio[i].dir_inodo != 2 && directorio[i].dir_inodo != NULL_INODO) // directorio root y que exista inodo
+		      if (strcmp(nombre, directorio[i].dir_nfich) == 0) return i;
+	}
+
+      return -1;
+}
+
+
+// FUNCIONES DE ACCION DE COMANDOS
 
 void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos)
 {
@@ -57,33 +72,47 @@ void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos)
 	}
 }
 
-
 void Printbytemaps(EXT_BYTE_MAPS *ext_bytemaps){
-      // Los bytemaps son caracteres, por eso %c,
-      // pero al ser 1 y 0, se debería poder poner %i,
-      //lo veremos cuando funciones
+      
+      // Del 0 al 24 incluidos
 	printf("Bloques [0-24]:\t");
-      // Imprime el bytemap de los primeros 25 bloques
       for (int i = 0; i < 25; i++) printf("%u ", ext_bytemaps->bmap_bloques[i]);
+
       printf("\nInodos:\t");
-      // Imprime el bytemap de inodos
       for (int i = 0; i < MAX_INODOS; i++) printf("%u ", ext_bytemaps->bmap_bloques[i]);
       printf("\n");
-      // que hace: ext_bytemaps->bmap_relleno ??
 }
+
+void PrintInfo(EXT_SIMPLE_SUPERBLOCK *ext_superblock){
+      printf("Bloque %i Bytes\n", ext_superblock->s_block_size);
+      printf("inodos particion = %i\n", ext_superblock->s_inodes_count);
+      printf("inodods libres = %i\n", ext_superblock->s_free_inodes_count);
+      printf("Bloques particion = %i\n", ext_superblock->s_blocks_count);
+	printf("Bloques libres = %i\n", ext_superblock->s_free_blocks_count);
+      printf("Primer bloque de datos = %i\n", ext_superblock->s_first_data_block);
+}
+
+
+// FUNCIONES PRE-ACCION
 
 int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argumento2)
 {
+      // Cambiamos ultimo '\n' del comando por '\0'
+      if (strcomando[strlen(strcomando)-1] == '\n') strcomando[strlen(strcomando)-1] = '\0';
+
+      // Y reiniciamos orden argumento1 y argumento2 para que no tengan basura
+      strcpy(orden, "\0");
+      strcpy(argumento1, "\0");
+      strcpy(argumento2, "\0");
+
 	/*
 	 *	Buscar en strcomando, la orden (primer espacio)
 	 *	luego buscar el argumento1 (segundo espacio)
 	 *	y por ultimo buscar el argumento2 (tercer espacio)
-	 * */
-	
-	char* subString = strtok(strcomando, " ");
+	*/
+      char* subString = strtok(strcomando, " ");
 	int argument_index = 0;
 	int res = -1;
-
 
 	while(subString != NULL)
 	{
@@ -110,8 +139,6 @@ int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argu
 				; // maximo de argumentos compatibles excedido
 			break;
 		}
-
-
 		argument_index++;
 		subString = strtok(NULL, " ");
 	}
@@ -119,45 +146,46 @@ int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argu
 	return res;
 }
 
-void handleComand(char *orden, char *argumento1, char *argumento2, int *comandoEncontrado, EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *ext_blq_inodos, EXT_BYTE_MAPS *ext_bytemaps)
+void handleComand(char *orden, char *argumento1, char *argumento2, int *comandoEncontrado,
+                  EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *ext_blq_inodos,
+                  EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock)
 {
       
-      if (strcmp(orden, "dir\n") == 0)
+      if (strcmp(orden, "dir") == 0)
       {
             Directorio(directorio, ext_blq_inodos);
             *comandoEncontrado = 1;
       }
-      else if (strcmp(orden, "info\n") == 0)
+      else if (strcmp(orden, "info") == 0)
       {
-            // Llamar funciones
-            printf("info");
+            PrintInfo(ext_superblock);
             *comandoEncontrado = 1;
       }
-      else if (strcmp(orden, "bytemaps\n") == 0)
+      else if (strcmp(orden, "bytemaps") == 0)
       {
             // Llamar funciones
 	    Printbytemaps(ext_bytemaps);
             *comandoEncontrado = 1;
       }
-      else if (strcmp(orden, "rename\n") == 0)
+      else if (strcmp(orden, "rename") == 0)
       {
             // Llamar funciones
             printf("rename");
             *comandoEncontrado = 1;
       }
-      else if (strcmp(orden, "imprimir\n") == 0)
+      else if (strcmp(orden, "imprimir") == 0)
       {
             // Llamar funciones
             printf("imprimir");
             *comandoEncontrado = 1;
       }
-      else if (strcmp(orden, "remove\n") == 0)
+      else if (strcmp(orden, "remove") == 0)
       {
             // Llamar funciones
             printf("remove");
             *comandoEncontrado = 1;
       }
-      else if (strcmp(orden, "copy\n") == 0)
+      else if (strcmp(orden, "copy") == 0)
       {
             // Llamar funciones
             printf("copy");
@@ -209,7 +237,8 @@ int main()
          fgets(comando, LONGITUD_COMANDO, stdin);
       } while (ComprobarComando(comando, orden, argumento1, argumento2) != 0);
 
-      handleComand(orden, argumento1, argumento2, &comandoEncontrado, directorio, &ext_blq_inodos, &ext_bytemaps);
+      handleComand(orden, argumento1, argumento2, &comandoEncontrado, directorio,
+      &ext_blq_inodos, &ext_bytemaps, &ext_superblock);
 
 /*
       // Escritura de metadatos en comandos rename, remove, copy
@@ -226,18 +255,19 @@ int main()
 */
       // Si el comando es salir se habrán escrito todos los metadatos
       // faltan los datos y cerrar
-      if (strcmp(orden, "salir\n") == 0)
+      if (strcmp(orden, "salir") == 0)
       {
             //GrabarDatos(&memdatos, fent);
             fclose(fent);
-	      printf("\nSaliendo......");
+	      printf("Saliendo......\n\n");
 	      return 0;
       }
 
       if (comandoEncontrado == 0)
       {
-	      printf("Error: Comando desconocido [bytemaps, copy, dir, info, imprimir, rename, remove, salir ]\n");
+	      printf("Error: Comando desconocido [bytemaps, copy, dir, info, imprimir, rename, remove, salir]\n");
       }
+      printf("\n"); // Estetico, creo que queda mejor
    }
 }
 
