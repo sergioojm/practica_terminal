@@ -34,6 +34,19 @@ void GrabarDatos(EXT_DATOS *memdatos, FILE *fich);
 
 
 
+void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos)
+{
+	for (int i = 0; i < MAX_FICHEROS; i++ )
+	{
+		if (directorio[i].dir_inodo != 2 && directorio[i].dir_inodo != NULL_INODO) // directorio root y que exista inodo
+		{
+			printf("%s Inodo: %i\n", directorio[i].dir_nfich, directorio[i].dir_inodo); //inodos[directorio[i].dir_inodo].blq_inodos[directorio[i].dir_inodo].size_fichero);	
+		}
+
+	}
+}
+
+
 void Printbytemaps(EXT_BYTE_MAPS *ext_bytemaps){
       // Los bytemaps son caracteres, por eso %c,
       // pero al ser 1 y 0, se debería poder poner %i,
@@ -93,49 +106,48 @@ int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argu
 	return res;
 }
 
-void handleComand(char *orden, char *argumento1, char *argumento2, int *comandoEncontrado){
+void handleComand(char *orden, char *argumento1, char *argumento2, int *comandoEncontrado, EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *ext_blq_inodos){
       
       if (strcmp(orden, "dir\n") == 0)
       {
-            //Directorio(&directorio, &ext_blq_inodos);
-            printf("dir");
-            comandoEncontrado = 1;
+            Directorio(directorio, ext_blq_inodos);
+            *comandoEncontrado = 1;
       }
       else if (strcmp(orden, "info\n") == 0)
       {
             // Llamar funciones
             printf("info");
-            comandoEncontrado = 1;
+            *comandoEncontrado = 1;
       }
       else if (strcmp(orden, "bytemaps\n") == 0)
       {
             // Llamar funciones
             printf("bytemaps");
-            comandoEncontrado = 1;
+            *comandoEncontrado = 1;
       }
       else if (strcmp(orden, "rename\n") == 0)
       {
             // Llamar funciones
             printf("rename");
-            comandoEncontrado = 1;
+            *comandoEncontrado = 1;
       }
       else if (strcmp(orden, "imprimir\n") == 0)
       {
             // Llamar funciones
             printf("imprimir");
-            comandoEncontrado = 1;
+            *comandoEncontrado = 1;
       }
       else if (strcmp(orden, "remove\n") == 0)
       {
             // Llamar funciones
             printf("remove");
-            comandoEncontrado = 1;
+            *comandoEncontrado = 1;
       }
       else if (strcmp(orden, "copy\n") == 0)
       {
             // Llamar funciones
             printf("copy");
-            comandoEncontrado = 1;
+            *comandoEncontrado = 1;
       }
 }
 
@@ -164,15 +176,13 @@ int main()
    fent = fopen("particion.bin", "r+b");
    fread(&datosfich, SIZE_BLOQUE, MAX_BLOQUES_PARTICION, fent);
 
-/* COMENTADOS PARA TESTING
 
    memcpy(&ext_superblock, (EXT_SIMPLE_SUPERBLOCK *)&datosfich[0], SIZE_BLOQUE);
-   memcpy(&directorio, (EXT_ENTRADA_DIR *)&datosfich[3], SIZE_BLOQUE);
+   memcpy(directorio, (EXT_ENTRADA_DIR *)&datosfich[3], SIZE_BLOQUE);
    memcpy(&ext_bytemaps, (EXT_BLQ_INODOS *)&datosfich[1], SIZE_BLOQUE);
    memcpy(&ext_blq_inodos, (EXT_BLQ_INODOS *)&datosfich[2], SIZE_BLOQUE);
    memcpy(&memdatos, (EXT_DATOS *)&datosfich[4], MAX_BLOQUES_DATOS * SIZE_BLOQUE);
 
-*/
    // Buce de tratamiento de comandos
    for (;;)
    {
@@ -185,7 +195,7 @@ int main()
          fgets(comando, LONGITUD_COMANDO, stdin);
       } while (ComprobarComando(comando, orden, argumento1, argumento2) != 0);
 
-      handleComand(orden, argumento1, argumento2, comandoEncontrado);
+      handleComand(orden, argumento1, argumento2, &comandoEncontrado, directorio, &ext_blq_inodos);
 
 /*
       // Escritura de metadatos en comandos rename, remove, copy
