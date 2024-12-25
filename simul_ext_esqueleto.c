@@ -79,6 +79,13 @@ int BuscaFich(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombre)
 
 // FUNCIONES DE ACCION DE COMANDOS
 
+int Borrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, 
+           EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock, char *nombre, FILE *fich)
+{
+
+	
+}
+
 void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos)
 {
 	for (int i = 0; i < MAX_FICHEROS; i++ )
