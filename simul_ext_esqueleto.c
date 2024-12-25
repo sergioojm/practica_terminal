@@ -85,49 +85,55 @@ int BuscaFich(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombre)
 
 int Borrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock, char *nombre, FILE *fich)
 {
-
+      int res = -1;
 	int foundFichero = BuscaFich(directorio, inodos, nombre);
 
-	if (foundFichero == -1)
+      if (strcmp(nombre, "") == 0)
+      {
+            printf("Faltan argumentos\n");
+      }
+	else if (foundFichero == -1)
 	{
 		printf("Fichero no encontrado\n");
-		return -1;
 	}
-	
-	for (int i = 0; i < MAX_FICHEROS; i++)
-	{
-		// yeims classic
-		if (directorio[i].dir_inodo == foundFichero)
-		{
+	else
+      {
+            for (int i = 0; i < MAX_FICHEROS; i++)
+            {
+                  // yeims classic
+                  if (directorio[i].dir_inodo == foundFichero)
+                  {
 
-			strcpy(directorio[i].dir_nfich, "\0");
-			inodos->blq_inodos[directorio[i].dir_inodo].size_fichero = 0;
+                        strcpy(directorio[i].dir_nfich, "\0");
+                        inodos->blq_inodos[directorio[i].dir_inodo].size_fichero = 0;
 
-			
-			// borrar puntero a bloques
-			for (int j = 0; j < MAX_NUMS_BLOQUE_INODO; j++)
-			{
-				if (inodos->blq_inodos[directorio[i].dir_inodo].i_nbloque[j] != NULL_BLOQUE)
-				{	
-					int bloque = inodos->blq_inodos[directorio[i].dir_inodo].i_nbloque[j];
-					ext_bytemaps->bmap_bloques[bloque] = 0;
-					inodos->blq_inodos[directorio[i].dir_inodo].i_nbloque[j] = NULL_BLOQUE;
-					ext_superblock->s_free_blocks_count++;
-				}
-			}
-
-
-			ext_superblock->s_free_inodes_count++;
-			ext_bytemaps->bmap_inodos[directorio[i].dir_inodo] = 0;
-			directorio[i].dir_inodo = NULL_INODO;
+                        
+                        // borrar puntero a bloques
+                        for (int j = 0; j < MAX_NUMS_BLOQUE_INODO; j++)
+                        {
+                              if (inodos->blq_inodos[directorio[i].dir_inodo].i_nbloque[j] != NULL_BLOQUE)
+                              {	
+                                    int bloque = inodos->blq_inodos[directorio[i].dir_inodo].i_nbloque[j];
+                                    ext_bytemaps->bmap_bloques[bloque] = 0;
+                                    inodos->blq_inodos[directorio[i].dir_inodo].i_nbloque[j] = NULL_BLOQUE;
+                                    ext_superblock->s_free_blocks_count++;
+                              }
+                        }
 
 
-		}
+                        ext_superblock->s_free_inodes_count++;
+                        ext_bytemaps->bmap_inodos[directorio[i].dir_inodo] = 0;
+                        directorio[i].dir_inodo = NULL_INODO;
 
-	}
-	printf("Fichero %s borrado exitosamente\n", nombre);
 
-	return 0;
+                  }
+
+            }
+            printf("Fichero %s borrado exitosamente\n", nombre);
+            res = 0;
+      }
+
+	return res;
 }
 
 void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos)
@@ -175,12 +181,15 @@ void LeeSuperBloque(EXT_SIMPLE_SUPERBLOCK *psup){
 
 int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *memdatos, char *nombre)
 {
-      int res = 0;
+      int res = -1;
       int dir_inodo = BuscaFich(directorio, inodos, nombre);
-	if (dir_inodo == -1)
+      if (strcmp(nombre, "") == 0)
+      {
+            printf("Faltan argumentos\n");
+      }
+	else if (dir_inodo == -1)
 	{
 		printf("Fichero no existente\n");
-            res = -1;
 	}
       else{
             int allNull = 1;
@@ -191,15 +200,22 @@ int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *mem
                         allNull = 0;
                         // Imprime unicamente el bloque, tenga o no \0
                         char caracter = memdatos[inodos->blq_inodos[dir_inodo].i_nbloque[i] - PRIM_BLOQUE_DATOS].dato[0];
-                        for (int j = 0; j < SIZE_BLOQUE && caracter != '\0'; j++){
+                        for (int j = 0; j < SIZE_BLOQUE && caracter != '\0'; j++)
+                        {
                               printf("%c", caracter);
                               caracter = memdatos[inodos->blq_inodos[dir_inodo].i_nbloque[i] - PRIM_BLOQUE_DATOS].dato[j+1];
                         }
                   }
             }
 
-            if (!allNull){
+            if (!allNull)
+            {
                   printf("\n");
+                  res = 0;
+            }
+            else
+            {
+                  printf("Fichero vacío\n");
             }
       }
 
@@ -208,35 +224,39 @@ int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *mem
 
 int Renombrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombreantiguo, char *nombrenuevo)
 {
-	int existeFichero = BuscaFich(directorio, inodos, nombreantiguo);
+      int res = -1;
+	int inodoFichero = BuscaFich(directorio, inodos, nombreantiguo);
 	int ficheroNombreNuevo = BuscaFich(directorio, inodos, nombrenuevo);
 
-
-	// si no existe el fichero, entonces terminar, como ella conmigo
-	if (existeFichero == -1)
+      if (strcmp(nombrenuevo, "") == 0)
+      {
+            printf("Faltan argumentos\n");
+      }
+	else if (inodoFichero == -1)
 	{
 		printf("Fichero a renombrar no existente, como tu pelo\n”");
 		return -1;
-	}	
-
-	// si existe algun fichero con el nombre al que queremos cambiar, terminar <repetir chiste>
-	if (ficheroNombreNuevo != -1)
+	}
+	else if (ficheroNombreNuevo != -1)
 	{
 		printf("Ese nombre ya existe!\n");
 		return -1;
 	}
+      else
+      {
+            for (int i = 0; i < MAX_FICHEROS; i++)
+            {
+                  //if (directorio[i].dir_inodo != 2 && directorio[i].dir_inodo != NULL_INODO && (strcmp(directorio[i].dir_nfich, nombreantiguo) == 0))
+                  if (directorio[i].dir_inodo == inodoFichero)
+                  {
+                        strcpy(directorio[i].dir_nfich, nombrenuevo);
+                        printf("Fichero renombrado con existo a %s\n", nombrenuevo);
+                        res = 0;
+                  }
+            }
+      }
 
-	for (int i = 0; i < MAX_FICHEROS; i++)
-	{
-		if (directorio[i].dir_inodo != 2 && directorio[i].dir_inodo != NULL_INODO && (strcmp(directorio[i].dir_nfich, nombreantiguo) == 0))
-		{
-			strcpy(directorio[i].dir_nfich, nombrenuevo);
-			printf("Fichero renombrado con existo a %s\n", nombrenuevo);
-		}
-
-	}
-
-	return 1;
+	return res;
 }
 
 int Copiar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos,
