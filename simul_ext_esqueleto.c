@@ -366,7 +366,7 @@ int main()
                   system("clear");
             }
             else{
-	            printf("Error: Comando desconocido [bytemaps, copy, dir, info, imprimir, rename, remove, salir]\n\n");
+	            printf("Error: Comando desconocido [bytemaps, copy, dir, info, imprimir, rename, remove, salir, clear]\n\n");
             }
       }
       else{
