@@ -32,61 +32,14 @@ void GrabarByteMaps(EXT_BYTE_MAPS *ext_bytemaps, FILE *fich);
 void GrabarSuperBloque(EXT_SIMPLE_SUPERBLOCK *ext_superblock, FILE *fich);
 void GrabarDatos(EXT_DATOS *memdatos, FILE *fich);
 
+
+// FUNCIONES DE DEPENDENCIA
+
 void GrabarDatos(EXT_DATOS *memdatos, FILE *fich)
 {
     fseek(fich, 4*SIZE_BLOQUE, SEEK_SET);
     fwrite(memdatos, MAX_BLOQUES_DATOS, SIZE_BLOQUE, fich);
 }
-
-
-
-int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *memdatos, char *nombre)
-{
-	if (BuscaFich(directorio, inodos, nombre) == -1)
-	{
-		printf("Fichero no existente\n");
-		return -1;
-	}
-
-
-
-
-}
-
-int Renombrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombreantiguo, char *nombrenuevo)
-{
-	int existeFichero = BuscaFich(directorio, inodos, nombreantiguo);
-	int ficheroNombreNuevo = BuscaFich(directorio, inodos, nombrenuevo);
-
-
-	// si no existe el fichero, entonces terminar, como ella conmigo
-	if (existeFichero == -1)
-	{
-		printf("Fichero a renombrar no existente, como tu pelo\n”");
-		return -1;
-	}	
-
-	// si existe algun fichero con el nombre al que queremos cambiar, terminar <repetir chiste>
-	if (ficheroNombreNuevo != -1)
-	{
-		printf("Ese nombre ya existe!\n");
-		return -1;
-	}
-
-	for (int i = 0; i < MAX_FICHEROS; i++)
-	{
-		if (directorio[i].dir_inodo != 2 && directorio[i].dir_inodo != NULL_INODO && (strcmp(directorio[i].dir_nfich, nombreantiguo) == 0))
-		{
-			strcpy(directorio[i].dir_nfich, nombrenuevo);
-			printf("Fichero renombrado con existo a %s\n", nombrenuevo);
-		}
-
-	}
-
-	return 1;
-}
-
-// FUNCIONES DE DEPENDENCIA
 
 int BuscaFich(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombre){
 
@@ -145,6 +98,56 @@ void LeeSuperBloque(EXT_SIMPLE_SUPERBLOCK *psup){
       printf("Bloques particion = %i\n", psup->s_blocks_count);
 	printf("Bloques libres = %i\n", psup->s_free_blocks_count);
       printf("Primer bloque de datos = %i\n", psup->s_first_data_block);
+}
+
+int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *memdatos, char *nombre)
+{
+      int fichero_inodo = BuscaFich(directorio, inodos, nombre);
+	if (fichero_inodo == -1)
+	{
+		printf("Fichero no existente\n");
+		return -1;
+	}
+      else{
+            
+      }
+
+
+
+
+}
+
+int Renombrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombreantiguo, char *nombrenuevo)
+{
+	int existeFichero = BuscaFich(directorio, inodos, nombreantiguo);
+	int ficheroNombreNuevo = BuscaFich(directorio, inodos, nombrenuevo);
+
+
+	// si no existe el fichero, entonces terminar, como ella conmigo
+	if (existeFichero == -1)
+	{
+		printf("Fichero a renombrar no existente, como tu pelo\n”");
+		return -1;
+	}	
+
+	// si existe algun fichero con el nombre al que queremos cambiar, terminar <repetir chiste>
+	if (ficheroNombreNuevo != -1)
+	{
+		printf("Ese nombre ya existe!\n");
+		return -1;
+	}
+
+	for (int i = 0; i < MAX_FICHEROS; i++)
+	{
+		if (directorio[i].dir_inodo != 2 && directorio[i].dir_inodo != NULL_INODO && (strcmp(directorio[i].dir_nfich, nombreantiguo) == 0))
+		{
+			strcpy(directorio[i].dir_nfich, nombrenuevo);
+			printf("Fichero renombrado con existo a %s\n", nombrenuevo);
+		}
+
+	}
+
+	return 1;
 }
 
 
