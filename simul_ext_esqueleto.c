@@ -38,8 +38,29 @@ void GrabarDatos(EXT_DATOS *memdatos, FILE *fich);
 void GrabarDatos(EXT_DATOS *memdatos, FILE *fich)
 {
       // PRIM_BLOQUE_DATOS = 4
-    fseek(fich, PRIM_BLOQUE_DATOS*SIZE_BLOQUE, SEEK_SET);
-    fwrite(memdatos, MAX_BLOQUES_DATOS, SIZE_BLOQUE, fich);
+    	fseek(fich, PRIM_BLOQUE_DATOS*SIZE_BLOQUE, SEEK_SET);
+    	fwrite(memdatos, MAX_BLOQUES_DATOS, SIZE_BLOQUE, fich);
+}
+
+void Grabarinodosydirectorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, FILE *fich)
+{
+	fseek(fich, 3 * SIZE_BLOQUE, SEEK_SET);
+	fwrite(directorio, 1, SIZE_BLOQUE, fich);
+	
+	fseek(fich, 2 * SIZE_BLOQUE, SEEK_SET);
+	fwrite(inodos, 1, SIZE_BLOQUE, fich);
+}
+
+void GrabarByteMaps(EXT_BYTE_MAPS *ext_bytemaps, FILE *fich)
+{
+	fseek(fich, SIZE_BLOQUE, SEEK_SET);
+	fwrite(ext_bytemaps, 1, SIZE_BLOQUE, fich);	
+}
+
+void GrabarSUperBloque(EXT_SIMPLE_SUPERBLOCK *ext_superblock, FILE *fich)
+{
+	fseek(fich, 0, SEEK_SET);
+	fwrite(ext_superblock, 1, SIZE_BLOQUE, fich);
 }
 
 int BuscaFich(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombre){
