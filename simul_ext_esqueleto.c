@@ -37,28 +37,32 @@ void GrabarDatos(EXT_DATOS *memdatos, FILE *fich);
 
 void GrabarDatos(EXT_DATOS *memdatos, FILE *fich)
 {
-      // PRIM_BLOQUE_DATOS = 4
+      // PRIM_BLOQUE_DATOS = 4 (bloque 4 en adelante)
     	fseek(fich, PRIM_BLOQUE_DATOS*SIZE_BLOQUE, SEEK_SET);
     	fwrite(memdatos, MAX_BLOQUES_DATOS, SIZE_BLOQUE, fich);
 }
 
 void Grabarinodosydirectorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, FILE *fich)
 {
+      // Directorios (bloque 3)
 	fseek(fich, 3 * SIZE_BLOQUE, SEEK_SET);
 	fwrite(directorio, 1, SIZE_BLOQUE, fich);
-	
+
+	// Inodos (bloque 2)
 	fseek(fich, 2 * SIZE_BLOQUE, SEEK_SET);
 	fwrite(inodos, 1, SIZE_BLOQUE, fich);
 }
 
 void GrabarByteMaps(EXT_BYTE_MAPS *ext_bytemaps, FILE *fich)
 {
+      // Bytemaps (bloque 1)
 	fseek(fich, SIZE_BLOQUE, SEEK_SET);
 	fwrite(ext_bytemaps, 1, SIZE_BLOQUE, fich);
 }
 
 void GrabarSuperBloque(EXT_SIMPLE_SUPERBLOCK *ext_superblock, FILE *fich)
 {
+      // Superbloque (bloque 0)
 	fseek(fich, 0, SEEK_SET);
 	fwrite(ext_superblock, 1, SIZE_BLOQUE, fich);
 }
@@ -381,9 +385,6 @@ int Copiar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos,
                               ext_superblock->s_free_inodes_count--;
                               ext_superblock->s_free_blocks_count -= nBloques;
 
-                              // Guardamos datos
-                              // ->
-
                               res = inodoDesignado;
                         }
                   }
@@ -449,7 +450,7 @@ int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argu
 void handleComand(char *orden, char *argumento1, char *argumento2, int *comandoEncontrado,
                   EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *ext_blq_inodos,
                   EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock,
-                  EXT_DATOS *memdatos, FILE *fich)
+                  EXT_DATOS *memdatos, FILE *fich, int *grabardatos)
 {
       
       if (strcmp(orden, "dir") == 0)
@@ -473,6 +474,7 @@ void handleComand(char *orden, char *argumento1, char *argumento2, int *comandoE
             // Llamar funciones
 		Renombrar(directorio, ext_blq_inodos, argumento1, argumento2);
 	      *comandoEncontrado = 1;
+            *grabardatos = 1;
       }
       else if (strcmp(orden, "imprimir") == 0)
       {
@@ -481,15 +483,15 @@ void handleComand(char *orden, char *argumento1, char *argumento2, int *comandoE
       }
       else if (strcmp(orden, "remove") == 0)
       {
-            // Llamar funciones
-       		
 		Borrar(directorio, ext_blq_inodos, ext_bytemaps, ext_superblock, argumento1, fich);
 	      *comandoEncontrado = 1;
+            *grabardatos = 1;
       }
       else if (strcmp(orden, "copy") == 0)
       {
             Copiar(directorio, ext_blq_inodos, ext_bytemaps, ext_superblock, memdatos, argumento1, argumento2, fich);
             *comandoEncontrado = 1;
+            *grabardatos = 1;
       }
 }
 
@@ -538,21 +540,19 @@ int main()
       } while (ComprobarComando(comando, orden, argumento1, argumento2) != 0);
 
       handleComand(orden, argumento1, argumento2, &comandoEncontrado, directorio,
-      &ext_blq_inodos, &ext_bytemaps, &ext_superblock, memdatos, fent);
-
-/*
-      // Escritura de metadatos en comandos rename, remove, copy
-      Grabarinodosydirectorio(&directorio, &ext_blq_inodos, fent);
-      GrabarByteMaps(&ext_bytemaps, fent);
-      GrabarSuperBloque(&ext_superblock, fent);
+      &ext_blq_inodos, &ext_bytemaps, &ext_superblock, memdatos, fent, &grabardatos);
+      
 
       if (grabardatos)
       {
-            GrabarDatos(&memdatos, fent);
+            Grabarinodosydirectorio(directorio, &ext_blq_inodos, fent);
+            GrabarByteMaps(&ext_bytemaps, fent);
+            GrabarSuperBloque(&ext_superblock, fent);
+            GrabarDatos(memdatos, fent);
       }
-   
       grabardatos = 0;
-*/
+
+
       // Si el comando es salir se habrán escrito todos los metadatos
       // faltan los datos y cerrar
       if (strcmp(orden, "salir") == 0)
