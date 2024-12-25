@@ -111,14 +111,24 @@ int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *mem
             res = -1;
 	}
       else{
-            for (int j = 0; j < MAX_NUMS_BLOQUE_INODO; j++)
-			{
-                        printf("%i", inodos->blq_inodos[dir_inodo].i_nbloque[j]);
-				if (inodos->blq_inodos[dir_inodo].i_nbloque[j] != NULL_BLOQUE)
-				{
-					printf("%s ", memdatos[inodos->blq_inodos[dir_inodo].i_nbloque[j] - PRIM_BLOQUE_DATOS - 1]);
-				}
-			}
+            int allNull = 1;
+            for (int i = 0; i < MAX_NUMS_BLOQUE_INODO; i++)
+            {
+                  if (inodos->blq_inodos[dir_inodo].i_nbloque[i] != NULL_BLOQUE)
+                  {
+                        allNull = 0;
+                        // Imprime unicamente el bloque, tenga o no \0
+                        char caracter = memdatos[inodos->blq_inodos[dir_inodo].i_nbloque[i] - PRIM_BLOQUE_DATOS].dato[0];
+                        for (int j = 0; j < SIZE_BLOQUE && caracter != '\0'; j++){
+                              printf("%c", caracter);
+                              caracter = memdatos[inodos->blq_inodos[dir_inodo].i_nbloque[i] - PRIM_BLOQUE_DATOS].dato[j+1];
+                        }
+                  }
+            }
+
+            if (!allNull){
+                  printf("\n");
+            }
       }
 
       return res;
@@ -330,9 +340,11 @@ int main()
 
       if (comandoEncontrado == 0)
       {
-	      printf("Error: Comando desconocido [bytemaps, copy, dir, info, imprimir, rename, remove, salir]\n");
+	      printf("Error: Comando desconocido [bytemaps, copy, dir, info, imprimir, rename, remove, salir]\n\n");
       }
-      printf("\n"); // Estetico, creo que queda mejor
+      else{
+            printf("\n"); // Estetico, creo que queda mejor
+      }
    }
 }
 
