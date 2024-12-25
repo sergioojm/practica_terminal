@@ -340,7 +340,13 @@ int main()
 
       if (comandoEncontrado == 0)
       {
-	      printf("Error: Comando desconocido [bytemaps, copy, dir, info, imprimir, rename, remove, salir]\n\n");
+            // Orden extra, clear (para Linux)
+            if (strcmp(orden, "clear") == 0){
+                  system("clear");
+            }
+            else{
+	            printf("Error: Comando desconocido [bytemaps, copy, dir, info, imprimir, rename, remove, salir]\n\n");
+            }
       }
       else{
             printf("\n"); // Estetico, creo que queda mejor
