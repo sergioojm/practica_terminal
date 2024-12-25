@@ -79,11 +79,50 @@ int BuscaFich(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombre)
 
 // FUNCIONES DE ACCION DE COMANDOS
 
-int Borrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, 
-           EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock, char *nombre, FILE *fich)
+int Borrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock, char *nombre, FILE *fich)
 {
 
+	int foundFichero = BuscaFich(directorio, inodos, nombre);
+
+	if (foundFichero == -1)
+	{
+		printf("Fichero no encontrado\n");
+		return -1;
+	}
 	
+	for (int i = 0; i < MAX_FICHEROS; i++)
+	{
+		if (directorio[i].dir_inodo == foundFichero)
+		{
+
+			strcpy(directorio[i].dir_nfich, "\0");
+			inodos->blq_inodos[directorio[i].dir_inodo].size_fichero = 0;
+
+			
+			// borrar puntero a bloques
+			for (int j = 0; j < MAX_NUMS_BLOQUE_INODO; j++)
+			{
+				if (inodos->blq_inodos[directorio[i].dir_inodo].i_nbloque[j] != NULL_BLOQUE)
+				{	
+					int bloque = inodos->blq_inodos[directorio[i].dir_inodo].i_nbloque[j];
+					ext_bytemaps->bmap_bloques[bloque] = 0;
+					inodos->blq_inodos[directorio[i].dir_inodo].i_nbloque[j] = NULL_BLOQUE;
+					ext_superblock->s_free_blocks_count++;
+				}
+			}
+
+
+			ext_superblock->s_free_inodes_count++;
+			ext_bytemaps->bmap_inodos[directorio[i].dir_inodo] = 0;
+			directorio[i].dir_inodo = NULL_INODO;
+
+
+		}
+
+	}
+	printf("Fichero %s borrado exitosamente\n", nombre);
+
+	return 0;
 }
 
 void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos)
@@ -116,7 +155,7 @@ void Printbytemaps(EXT_BYTE_MAPS *ext_bytemaps){
       for (int i = 0; i < 25; i++) printf("%u ", ext_bytemaps->bmap_bloques[i]);
 
       printf("\nInodos:\t");
-      for (int i = 0; i < MAX_INODOS; i++) printf("%u ", ext_bytemaps->bmap_bloques[i]);
+      for (int i = 0; i < MAX_INODOS; i++) printf("%u ", ext_bytemaps->bmap_inodos[i]);
       printf("\n");
 }
 
@@ -252,7 +291,7 @@ int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argu
 void handleComand(char *orden, char *argumento1, char *argumento2, int *comandoEncontrado,
                   EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *ext_blq_inodos,
                   EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock,
-                  EXT_DATOS *memdatos)
+                  EXT_DATOS *memdatos, FILE *fich)
 {
       
       if (strcmp(orden, "dir") == 0)
@@ -285,8 +324,9 @@ void handleComand(char *orden, char *argumento1, char *argumento2, int *comandoE
       else if (strcmp(orden, "remove") == 0)
       {
             // Llamar funciones
-            printf("remove");
-            *comandoEncontrado = 1;
+       		
+		Borrar(directorio, ext_blq_inodos, ext_bytemaps, ext_superblock, argumento1, fich);
+	      *comandoEncontrado = 1;
       }
       else if (strcmp(orden, "copy") == 0)
       {
@@ -341,7 +381,7 @@ int main()
       } while (ComprobarComando(comando, orden, argumento1, argumento2) != 0);
 
       handleComand(orden, argumento1, argumento2, &comandoEncontrado, directorio,
-      &ext_blq_inodos, &ext_bytemaps, &ext_superblock, memdatos);
+      &ext_blq_inodos, &ext_bytemaps, &ext_superblock, memdatos, fent);
 
 /*
       // Escritura de metadatos en comandos rename, remove, copy
@@ -370,7 +410,7 @@ int main()
       {
             // Orden extra, clear (para Linux)
             if (strcmp(orden, "clear") == 0){
-                  system("clear");
+//                  system("clear");
             }
             else{
 	            printf("Error: Comando desconocido [bytemaps, copy, dir, info, imprimir, rename, remove, salir, clear]\n\n");
