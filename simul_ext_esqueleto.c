@@ -37,7 +37,8 @@ void GrabarDatos(EXT_DATOS *memdatos, FILE *fich);
 
 void GrabarDatos(EXT_DATOS *memdatos, FILE *fich)
 {
-    fseek(fich, 4*SIZE_BLOQUE, SEEK_SET);
+      // PRIM_BLOQUE_DATOS = 4
+    fseek(fich, PRIM_BLOQUE_DATOS*SIZE_BLOQUE, SEEK_SET);
     fwrite(memdatos, MAX_BLOQUES_DATOS, SIZE_BLOQUE, fich);
 }
 
@@ -48,7 +49,7 @@ int BuscaFich(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombre)
       for (int i = 0; i < MAX_FICHEROS; i++)
 	{
 		if (directorio[i].dir_inodo != 2 && directorio[i].dir_inodo != NULL_INODO) // directorio root y que exista inodo
-		      if (strcmp(nombre, directorio[i].dir_nfich) == 0) res = i;
+		      if (strcmp(nombre, directorio[i].dir_nfich) == 0) res = directorio[i].dir_inodo;
 	}
 
       return res;
@@ -102,19 +103,25 @@ void LeeSuperBloque(EXT_SIMPLE_SUPERBLOCK *psup){
 
 int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *memdatos, char *nombre)
 {
-      int fichero_inodo = BuscaFich(directorio, inodos, nombre);
-	if (fichero_inodo == -1)
+      int res = 0;
+      int dir_inodo = BuscaFich(directorio, inodos, nombre);
+	if (dir_inodo == -1)
 	{
 		printf("Fichero no existente\n");
-		return -1;
+            res = -1;
 	}
       else{
-            
+            for (int j = 0; j < MAX_NUMS_BLOQUE_INODO; j++)
+			{
+                        printf("%i", inodos->blq_inodos[dir_inodo].i_nbloque[j]);
+				if (inodos->blq_inodos[dir_inodo].i_nbloque[j] != NULL_BLOQUE)
+				{
+					printf("%s ", memdatos[inodos->blq_inodos[dir_inodo].i_nbloque[j] - PRIM_BLOQUE_DATOS - 1]);
+				}
+			}
       }
 
-
-
-
+      return res;
 }
 
 int Renombrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombreantiguo, char *nombrenuevo)
@@ -206,7 +213,8 @@ int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argu
 
 void handleComand(char *orden, char *argumento1, char *argumento2, int *comandoEncontrado,
                   EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *ext_blq_inodos,
-                  EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock)
+                  EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock,
+                  EXT_DATOS *memdatos)
 {
       
       if (strcmp(orden, "dir") == 0)
@@ -233,8 +241,7 @@ void handleComand(char *orden, char *argumento1, char *argumento2, int *comandoE
       }
       else if (strcmp(orden, "imprimir") == 0)
       {
-            // Llamar funciones
-            printf("imprimir");
+            Imprimir(directorio, ext_blq_inodos, memdatos, argumento1);
             *comandoEncontrado = 1;
       }
       else if (strcmp(orden, "remove") == 0)
@@ -296,7 +303,7 @@ int main()
       } while (ComprobarComando(comando, orden, argumento1, argumento2) != 0);
 
       handleComand(orden, argumento1, argumento2, &comandoEncontrado, directorio,
-      &ext_blq_inodos, &ext_bytemaps, &ext_superblock);
+      &ext_blq_inodos, &ext_bytemaps, &ext_superblock, memdatos);
 
 /*
       // Escritura de metadatos en comandos rename, remove, copy
