@@ -92,6 +92,7 @@ int Borrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_BYTE_MAPS *e
 	
 	for (int i = 0; i < MAX_FICHEROS; i++)
 	{
+		// yeims classic
 		if (directorio[i].dir_inodo == foundFichero)
 		{
 
