@@ -124,8 +124,6 @@ int Borrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_BYTE_MAPS *e
                         ext_superblock->s_free_inodes_count++;
                         ext_bytemaps->bmap_inodos[directorio[i].dir_inodo] = 0;
                         directorio[i].dir_inodo = NULL_INODO;
-
-
                   }
 
             }
@@ -409,6 +407,7 @@ int Copiar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos,
                               ext_superblock->s_free_inodes_count--;
                               ext_superblock->s_free_blocks_count -= nBloques;
 
+                              printf("Fichero copiado con exito a %s\n", nombredestino);
                               res = inodoDesignado;
                         }
                   }
@@ -554,7 +553,7 @@ int main()
    // Buce de tratamiento de comandos
    for (;;)
    {
-	int comandoEncontrado = 0;
+      int comandoEncontrado = 0;
 
 	do
       {
