@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include "cabeceras.h"
 
+#define LEN_HIST 20
 #define LONGITUD_COMANDO 100
 
 void Printbytemaps(EXT_BYTE_MAPS *ext_bytemaps);
@@ -26,6 +27,8 @@ int Borrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos,
 int Copiar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos,
            EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock,
            EXT_DATOS *memdatos, char *nombreorigen, char *nombredestino, FILE *fich);
+
+void ShowHistory(char history[LEN_HIST][LONGITUD_COMANDO], int nComandos);
 
 void Grabarinodosydirectorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, FILE *fich);
 void GrabarByteMaps(EXT_BYTE_MAPS *ext_bytemaps, FILE *fich);
@@ -417,6 +420,14 @@ int Copiar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos,
 	return res;
 }
 
+void ShowHistory(char history[LEN_HIST][LONGITUD_COMANDO], int nComandos){
+      for(int i = 0; i < nComandos; i++)
+      {
+            printf("%s\n", history[i]);
+      }
+      printf("\n");
+}
+
 // FUNCIONES PRE-ACCION
 
 int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argumento2)
@@ -534,6 +545,8 @@ int main()
    EXT_ENTRADA_DIR directorio[MAX_FICHEROS];
    EXT_DATOS memdatos[MAX_BLOQUES_DATOS];
    EXT_DATOS datosfich[MAX_BLOQUES_PARTICION];
+   char history[LEN_HIST][LONGITUD_COMANDO];
+   int nComandos = 0;
    int entradadir;
    int grabardatos;
    FILE *fent;
@@ -588,15 +601,39 @@ int main()
 
       if (comandoEncontrado == 0)
       {
-            // Orden extra, clear (para Linux)
+            // Ordenes extras
             if (strcmp(orden, "clear") == 0){
                   system("clear");
             }
+            else if (strcmp(orden, "history") == 0)
+            {
+                  ShowHistory(history, nComandos);
+            }
             else{
-	            printf("Error: Comando desconocido [bytemaps, copy, dir, info, imprimir, rename, remove, salir, clear]\n\n");
+	            printf("Error: Comando desconocido [bytemaps, copy, dir, info, imprimir, rename, remove, clear, history, salir]\n\n");
             }
       }
       else{
+            if (nComandos >= LEN_HIST)
+            {
+                  for(int i = 1; i < LEN_HIST; i++)
+                  {
+                        strcpy(history[i-1], history[i]);
+                  }
+                  nComandos--;
+            }
+            char comand[LONGITUD_COMANDO];
+            strcpy(comand, "\0");
+
+            strcat(comand, orden);
+            strcat(comand, " ");
+            strcat(comand, argumento1);
+            strcat(comand, " ");
+            strcat(comand, argumento2);
+            comand[LONGITUD_COMANDO - 1] = '\0';
+
+            strcpy(history[nComandos++], comand);
+
             printf("\n"); // Estetico, creo que queda mejor
       }
    }
