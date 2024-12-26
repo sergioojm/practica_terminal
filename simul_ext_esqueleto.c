@@ -242,6 +242,10 @@ int Renombrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombrea
 		printf("Ese nombre ya existe!\n");
 		return -1;
 	}
+      else if (strlen(nombrenuevo) >= LEN_NFICH) // 16 máx (+ 1 para \0)
+      {
+            printf("El nombre introducido excede el maximo de %i caracteres\n", LEN_NFICH-1);
+      }
       else
       {
             for (int i = 0; i < MAX_FICHEROS; i++)
