@@ -235,7 +235,7 @@ int Renombrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombrea
       }
 	else if (inodoFichero == -1)
 	{
-		printf("Fichero a renombrar no existente, como tu pelo\n”");
+		printf("Fichero a renombrar no existente\n”");
 		return -1;
 	}
 	else if (ficheroNombreNuevo != -1)
@@ -251,12 +251,13 @@ int Renombrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombrea
       {
             for (int i = 0; i < MAX_FICHEROS; i++)
             {
-                  //if (directorio[i].dir_inodo != 2 && directorio[i].dir_inodo != NULL_INODO && (strcmp(directorio[i].dir_nfich, nombreantiguo) == 0))
+                  
                   if (directorio[i].dir_inodo == inodoFichero)
                   {
                         strcpy(directorio[i].dir_nfich, nombrenuevo);
                         printf("Fichero renombrado con existo a %s\n", nombrenuevo);
                         res = 0;
+                        break;
                   }
             }
       }
